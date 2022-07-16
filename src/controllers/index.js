@@ -11,7 +11,7 @@ router.post('/create', async (ctx, next) => {
   const aid = crypto.randomUUID();
   const { content } = ctx.request.body;
   const reason = 'Init commit';
-  await ArticleService.save(pool, aid, reason, content, -1);
+  await ArticleService.save(pool, aid, reason, content, 0);
   ctx.body = { 'status': 'Success', 'message': aid };
 });
 
@@ -31,9 +31,9 @@ router.get('/:aid', async (ctx, next) => {
 router.post('/:aid/edit', async (ctx, next) => {
   const pool = ctx.app.pool;
   const aid = ctx.params.aid;
-  const { based_on: basedOn, reason, content } = ctx.request.body;
+  const { ordinal, reason, content } = ctx.request.body;
   const delta = content;
-  await ArticleService.save(pool, aid, reason, content, +basedOn);
+  await ArticleService.save(pool, aid, reason, content, +ordinal);
   ctx.body = { 'status': 'Success'};
 });
 

@@ -6,7 +6,7 @@ const getAll = async (pool, includePrivate, page) => {
 
 const getVersions = async (pool, aid) => {
   const { rows } = await pool.query(`
-    SELECT delta FROM versions WHERE aid = $1 ORDER BY based_on
+    SELECT delta FROM versions WHERE aid = $1 ORDER BY ordinal
   `, [aid]);
   return rows;
 };
@@ -20,11 +20,11 @@ const insertArticle = async (pool, aid, isPublic, name, description) => {
   `, [aid, isPublic, name, description])
 };
 
-const insertVersion = async (pool, aid, reason, delta, basedOn) => {
+const insertVersion = async (pool, aid, reason, delta, ordinal) => {
   await pool.query(`
-    INSERT INTO versions (aid, based_on, uid, reason, delta)
+    INSERT INTO versions (aid, ordinal, uid, reason, delta)
     VALUES ($1, $2, $3, $4, $5)
-  `, [aid, basedOn + 1, 1, reason, delta])
+  `, [aid, ordinal, 1, reason, delta])
 };
 
 module.exports = {

@@ -17,13 +17,8 @@ const getContent = async (pool, aid) => {
     }, '');
 };
 
-const save = async (pool, aid, reason, content, basedOn) => {
-  let previousContent;
-  if (basedOn == -1) {
-    previousContent = '';
-  } else {
-    previousContent = await getContent(pool, aid);
-  }
+const save = async (pool, aid, reason, content, ordinal) => {
+  const previousContent = ordinal == 0 ? '' : await getContent(pool, aid);
   const dmp = new DiffMatchPatch();
   const diffs = dmp.diff_main(previousContent, content);
   const delta = dmp.diff_toDelta(diffs);
@@ -33,7 +28,7 @@ const save = async (pool, aid, reason, content, basedOn) => {
   const isPublic = true;
 
   await Dao.insertArticle(pool, aid, isPublic, name, description);
-  await Dao.insertVersion(pool, aid, reason, delta, basedOn);
+  await Dao.insertVersion(pool, aid, reason, delta, ordinal);
 };
 
 module.exports = {
