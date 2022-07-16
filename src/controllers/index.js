@@ -1,6 +1,6 @@
 const Router = require('koa-router');
 const crypto = require('crypto');
-const { createArticle, getArticles } = require('../services/article_dao');
+const ArticleService = require('../services/article_service');
 
 const router = new Router({
   prefix: '/api/articles'
@@ -9,23 +9,32 @@ const router = new Router({
 router.post('/create', async (ctx, next) => {
   const pool = ctx.app.pool;
   const aid = crypto.randomUUID();
-  const { name, description, is_public: isPublic } = ctx.request.body;
-  const delta = 'TODO delta';
-  await createArticle(pool, aid, isPublic, name, description, delta);
-  ctx.body = { 'status': 'Success'};
+  const { content } = ctx.request.body;
+  const reason = 'Init commit';
+  await ArticleService.save(pool, aid, reason, content, -1);
+  ctx.body = { 'status': 'Success', 'message': aid };
 });
 
 router.get('/list', async (ctx, next) => {
-  const rows = await getArticles(ctx.app.pool);
+  const rows = await ArticleService.getAll(ctx.app.pool, false, 1);
   ctx.body = rows;
 });
 
-router.get('/:slug', (ctx, next) => {
+router.get('/:aid', async (ctx, next) => {
+  const content = await ArticleService.getContent(ctx.app.pool, ctx.params.aid);
   ctx.body = {
-    'slug': ctx.params.slug,
     'name': 'To be done',
-    'content': '<p>Paragraph 1</p><p>Paragraph 2</p><p>Etc.</p>',
+    'content': content,
   };
+});
+
+router.post('/:aid/edit', async (ctx, next) => {
+  const pool = ctx.app.pool;
+  const aid = ctx.params.aid;
+  const { based_on: basedOn, reason, content } = ctx.request.body;
+  const delta = content;
+  await ArticleService.save(pool, aid, reason, content, +basedOn);
+  ctx.body = { 'status': 'Success'};
 });
 
 module.exports = router
