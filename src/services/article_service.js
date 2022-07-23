@@ -1,9 +1,26 @@
 const DiffMatchPatch = require('diff-match-patch');
+const matter = require('gray-matter');
 const Dao = require('./article_dao');
+
+const extractMarkdown = (markdown) => {
+  const matterResult = matter(markdown);
+  return {
+    name: matterResult.data.name,
+    description: matterResult.data.description,
+    isPublic: matterResult.data.public == 'true',
+    content: matterResult.content,
+  };
+};
 
 const getAll = async (pool, includePrivate, page) => {
   const rows = await Dao.getAll(pool, includePrivate, page);
   return rows;
+};
+
+const getArticle = async (pool, aid) => {
+  const markdown = await getContent(pool, aid);
+  const { name, content } = extractMarkdown(markdown);
+  return { name, content };
 };
 
 const getContent = async (pool, aid) => {
@@ -23,16 +40,13 @@ const save = async (pool, aid, reason, content, ordinal) => {
   const diffs = dmp.diff_main(previousContent, content);
   const delta = dmp.diff_toDelta(diffs);
 
-  const name = 'TODO: name of the article';
-  const description = 'TODO: description';
-  const isPublic = true;
-
+  const { name, description, isPublic } = extractMarkdown(content);
   await Dao.insertArticle(pool, aid, isPublic, name, description);
   await Dao.insertVersion(pool, aid, reason, delta, ordinal);
 };
 
 module.exports = {
   getAll,
-  getContent,
+  getArticle,
   save,
 };

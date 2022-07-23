@@ -21,10 +21,11 @@ router.get('/list', async (ctx, next) => {
 });
 
 router.get('/:aid', async (ctx, next) => {
-  const content = await ArticleService.getContent(ctx.app.pool, ctx.params.aid);
+  const article = await ArticleService.getArticle(ctx.app.pool, ctx.params.aid);
   ctx.body = {
-    'name': 'To be done',
-    'content': content,
+    'name': article.name,
+    'description': article.description,
+    'content': article.content,
   };
 });
 
