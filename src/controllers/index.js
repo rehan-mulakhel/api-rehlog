@@ -29,11 +29,21 @@ router.get('/:aid', async (ctx, next) => {
   };
 });
 
+router.get('/:aid/edit', async (ctx, next) => {
+  const {
+    markdown,
+    ordinal,
+  } = await ArticleService.getMarkdown(ctx.app.pool, ctx.params.aid);
+  ctx.body = {
+    'markdown': markdown,
+    'ordinal': ordinal,
+  };
+});
+
 router.post('/:aid/edit', async (ctx, next) => {
   const pool = ctx.app.pool;
   const aid = ctx.params.aid;
   const { ordinal, reason, content } = ctx.request.body;
-  const delta = content;
   await ArticleService.save(pool, aid, reason, content, +ordinal);
   ctx.body = { 'status': 'Success'};
 });
