@@ -1,5 +1,5 @@
 const getAll = async (pool, includePrivate, page) => {
-  const q = 'SELECT aid, published, name FROM articles';
+  const q = 'SELECT aid, published, name, description FROM articles';
   const { rows } = await pool.query(q);
   return rows;
 };
